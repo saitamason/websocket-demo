@@ -1,4 +1,4 @@
-import { WebSocketServer } from "ws";
+import { WebSocketServer, WebSocket } from "ws";
 
 const wss = new WebSocketServer({ port: 8080 });
 
@@ -18,11 +18,20 @@ wss.on("connection", (ws) => {
       return;
     }
 
+    // This is how the message object should look like
+    // {
+    //   "type": "NEW_MESSAGE",
+    //   "payload": {
+    //     "author": "User 1",
+    //     "message": "This is a new message text"
+    //   }
+    // }
     if (message.type === "NEW_MESSAGE") {
       wss.clients.forEach((client) => {
         // Check if the client is not the sender and can receive messages
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(data);
+        // if (client !== ws && client.readyState === WebSocket.OPEN)
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(`${message.payload.author}: ${message.payload.message}`);
         }
       });
     }
